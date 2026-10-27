@@ -1,16 +1,32 @@
-# OPD Care Coordination Simulator — Dr. Shareef Muhammed
+# OPD Queue Simulator: Current vs Proposed
 
-A single-file browser prototype for exploring illustrative OPD patient-flow scenarios.
+An interactive, browser-based simulation comparing two ways of running a morning
+outpatient department (OPD): **everyone walks in** (current) vs **appointments + PIN/tokens + triage** (proposed).
+Both systems run on the same patients and the same staff.
+
+**Live demo:** https://YOUR-USERNAME.github.io/opd-queue-simulator/
+
+## What it shows
+- Two animated floorplans side by side (registration → vitals → consultation → pharmacy)
+- KPIs: time standing in queues, registration wait, total time in the OPD
+- Click any patient dot to follow their journey
+- Sliders for appointment share, patient volume, service times, staffing, PIN uptake
+- Preset scenarios (heavy Monday, high digital adoption, complex cases)
 
 ## Run locally
-Open `index.html` in a modern browser. No installation or server is required.
+No build step and no dependencies. Download the repo and open `index.html` in any modern browser.
 
-## Publish under your own GitHub Pages link
-1. Sign in to GitHub and create a new **public** repository, e.g. `opd-care-coordination-simulator`.
-2. Upload `index.html` to the repository root.
-3. Open **Settings → Pages**.
-4. Under build/deployment, choose **Deploy from a branch**, select `main` and `/ (root)`, then Save.
-5. After deployment, your link will be `https://YOUR-GITHUB-USERNAME.github.io/opd-care-coordination-simulator/`.
+## Project structure
+```
+index.html   # the whole simulator (HTML + CSS + JavaScript)
+README.md
+LICENSE
+.nojekyll
+```
 
-## Important limitation
-This is a demonstration prototype with simplified illustrative calculations, not a validated discrete-event simulation and not a live hospital system. Replace assumptions with observed facility data and validate the model before using it for operational decisions. It does not collect or transmit patient data.
+## Customising
+Open `index.html` and edit the `params` object near the top of the `<script>` block
+(service times, staffing, appointment ratio, number of patients). The `LAYOUT` object controls the floorplan.
+
+## License
+MIT. See `LICENSE`.
