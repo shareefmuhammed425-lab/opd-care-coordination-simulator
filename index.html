@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dr. Shareef Muhammed | OPD Care Coordination Simulator</title>
+<style>
+:root{--navy:#14324b;--teal:#087f8c;--pale:#edf6f7;--ink:#203040;--muted:#617181;--line:#dbe5eb;--white:#fff;--orange:#d97706}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fa;color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,#14324b,#087f8c);color:#fff;padding:28px max(20px,calc((100% - 1200px)/2))}
+header .eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:11px;opacity:.8;font-weight:700}
+h1{margin:7px 0 4px;font-size:clamp(24px,3vw,34px)}header p{margin:0;max-width:780px;color:#e3f1f5}
+main{max-width:1200px;margin:22px auto;padding:0 18px 35px}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+.panel,.metric,.stage{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 14px #14324b0b}
+.panel{padding:18px}.panel h2,.section-title{margin:0 0 12px;font-size:18px;color:var(--navy)}
+label{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:650;margin:15px 0 6px}
+output{color:var(--teal);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--teal)}
+select,button{font:inherit;border-radius:9px;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+select{width:100%}.btns{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+button{cursor:pointer;font-weight:700}.primary{background:var(--teal);color:#fff;border-color:var(--teal)}button:hover{filter:brightness(.96)}
+.note{font-size:12px;color:var(--muted);margin-top:12px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.metric{padding:15px}.metric .label{font-size:12px;color:var(--muted)}.metric .value{font-size:25px;font-weight:800;color:var(--navy);margin-top:4px}.metric .sub{font-size:11px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stage{padding:16px}.stage h3{margin:0 0 4px;color:var(--navy)}.stage .desc{font-size:12px;color:var(--muted);margin-bottom:14px}
+.bar-row{margin:12px 0}.bar-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}.bar{height:9px;background:#e8eef2;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--teal);width:30%;transition:width .25s}
+.flow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin:15px 0}.node{flex:1;min-width:90px;background:var(--pale);border:1px solid #d5e9eb;border-radius:10px;padding:10px 8px;text-align:center}.node b{display:block;font-size:12px}.node span{font-size:11px;color:var(--muted)}
+.insight{margin-top:16px;background:#fff8eb;border:1px solid #f4dfb5;border-radius:12px;padding:14px;font-size:13px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.compare{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+ <div class="eyebrow">Healthcare Operations • Demonstration Prototype</div>
+ <h1>OPD Care Coordination Simulator</h1>
+ <p>Explore how appointment booking, patient identification and service capacity may influence outpatient waiting time and patient flow.</p>
+</header>
+<main>
+ <div class="grid">
+  <section class="panel">
+   <h2>Configure the scenario</h2>
+   <label for="patients">Patients per session <output id="patientsOut">160</output></label>
+   <input id="patients" type="range" min="40" max="300" step="10" value="160">
+   <label for="appointment">Patients with appointments <output id="appointmentOut">50%</output></label>
+   <input id="appointment" type="range" min="0" max="90" step="10" value="50">
+   <label for="registration">Registration time per patient <output id="registrationOut">4 min</output></label>
+   <input id="registration" type="range" min="1" max="10" value="4">
+   <label for="vitals">Vitals assessment time <output id="vitalsOut">5 min</output></label>
+   <input id="vitals" type="range" min="1" max="12" value="5">
+   <label for="consult">Consultation time <output id="consultOut">8 min</output></label>
+   <input id="consult" type="range" min="3" max="20" value="8">
+   <label for="regCounters">Registration counters <output id="regCountersOut">3</output></label>
+   <input id="regCounters" type="range" min="1" max="8" value="3">
+   <label for="nurses">Vitals stations <output id="nursesOut">3</output></label>
+   <input id="nurses" type="range" min="1" max="8" value="3">
+   <label for="doctors">Doctors available <output id="doctorsOut">6</output></label>
+   <input id="doctors" type="range" min="1" max="15" value="6">
+   <label for="pharmacy">Pharmacy counters <output id="pharmacyOut">2</output></label>
+   <input id="pharmacy" type="range" min="1" max="8" value="2">
+   <div class="btns"><button class="primary" id="run">Run simulation</button><button id="reset">Reset defaults</button></div>
+   <p class="note">Illustrative model only. Update assumptions with real facility observations before using results for planning.</p>
+  </section>
+  <section>
+   <div class="metrics">
+    <div class="metric"><div class="label">Baseline estimated OPD time</div><div class="value" id="baselineTotal">—</div><div class="sub">minutes per patient</div></div>
+    <div class="metric"><div class="label">Proposed estimated OPD time</div><div class="value" id="proposedTotal">—</div><div class="sub">minutes per patient</div></div>
+    <div class="metric"><div class="label">Estimated time change</div><div class="value" id="change">—</div><div class="sub">proposed vs baseline</div></div>
+    <div class="metric"><div class="label">Estimated registration queue</div><div class="value" id="queue">—</div><div class="sub">patients at peak (proxy)</div></div>
+   </div>
+   <div class="compare">
+    <div class="stage">
+     <h3>Baseline: walk-in workflow</h3><div class="desc">All patients enter the same registration flow.</div>
+     <div class="flow"><div class="node"><b>Arrival</b><span>Walk-in</span></div><div class="node"><b>Registration</b><span>PIN / record</span></div><div class="node"><b>Vitals</b><span>Assessment</span></div><div class="node"><b>Doctor</b><span>Consultation</span></div><div class="node"><b>Pharmacy</b><span>Dispensing</span></div></div>
+     <div id="baselineBars"></div>
+    </div>
+    <div class="stage">
+     <h3>Proposed: coordinated workflow</h3><div class="desc">Appointment share, patient identification and configurable capacity are considered.</div>
+     <div class="flow"><div class="node"><b>Booking</b><span>Appointment / walk-in</span></div><div class="node"><b>PIN + ABHA</b><span>Assisted identification</span></div><div class="node"><b>Token</b><span>Slot allocation</span></div><div class="node"><b>Care</b><span>Vitals + doctor</span></div><div class="node"><b>Exit</b><span>Prescription / pharmacy</span></div></div>
+     <div id="proposedBars"></div>
+    </div>
+   </div>
+   <div class="insight" id="insight">Adjust the scenario and select “Run simulation” to view the illustrative comparison.</div>
+  </section>
+ </div>
+ <footer>Prepared as a concept prototype for Dr. Shareef Muhammed • Not a validated forecasting tool or a live hospital system.</footer>
+</main>
+<script>
+const ids=['patients','appointment','registration','vitals','consult','regCounters','nurses','doctors','pharmacy'];
+const defaults={patients:160,appointment:50,registration:4,vitals:5,consult:8,regCounters:3,nurses:3,doctors:6,pharmacy:2};
+function val(id){return +document.getElementById(id).value}
+function setOutputs(){ids.forEach(id=>{let el=document.getElementById(id),o=document.getElementById(id+'Out');o.textContent=el.value+(id==='appointment'?'%':(['registration','vitals','consult'].includes(id)?' min':''))})}
+function fmt(n){return Math.round(n)+' min'}
+function bar(label,value,max){let pct=Math.max(3,Math.min(100,value/max*100));return `<div class="bar-row"><div class="bar-head"><span>${label}</span><b>${fmt(value)}</b></div><div class="bar"><div class="fill" style="width:${pct}%"></div></div></div>`}
+function simulate(){
+ setOutputs();
+ const p=val('patients'), ap=val('appointment')/100, r=val('registration'), v=val('vitals'), c=val('consult'), rc=val('regCounters'), n=val('nurses'), d=val('doctors'), ph=val('pharmacy');
+ const session=240, pharmacyTime=4, arrivalsPerMin=p/session;
+ // Simple queue pressure proxy: service load compared with session capacity, not a discrete-event simulation.
+ const regLoad=arrivalsPerMin*r/rc, vitLoad=arrivalsPerMin*v/n, docLoad=arrivalsPerMin*c/d, pharmLoad=arrivalsPerMin*pharmacyTime/ph;
+ const baseQueue=Math.max(0,regLoad-0.65)*session*0.35;
+ const baseWaitReg=Math.max(0,(p*r/(rc*session)-0.7))*session*0.45 + r/2;
+ const baseWaitVit=Math.max(0,(p*v/(n*session)-0.7))*session*0.35 + v/2;
+ const baseWaitDoc=Math.max(0,(p*c/(d*session)-0.7))*session*0.5 + c/2;
+ const baseWaitPh=Math.max(0,(p*pharmacyTime/(ph*session)-0.7))*session*0.25 + pharmacyTime/2;
+ const baselineStages={ 'Registration':r/2+baseWaitReg,'Vitals':v/2+baseWaitVit,'Consultation':c/2+baseWaitDoc,'Pharmacy':pharmacyTime/2+baseWaitPh};
+ const proposedRegTime=r*(1-0.25*ap), staggerFactor=1-0.30*ap;
+ const propWaitReg=baseWaitReg*staggerFactor, propWaitVit=baseWaitVit*(1-0.12*ap), propWaitDoc=baseWaitDoc*(1-0.18*ap);
+ const proposedStages={'Registration / identification':proposedRegTime/2+propWaitReg,'Vitals':v/2+propWaitVit,'Consultation':c/2+propWaitDoc,'Pharmacy':pharmacyTime/2+baseWaitPh};
+ const totalBase=Object.values(baselineStages).reduce((a,b)=>a+b,0),totalProp=Object.values(proposedStages).reduce((a,b)=>a+b,0);
+ document.getElementById('baselineTotal').textContent=fmt(totalBase);document.getElementById('proposedTotal').textContent=fmt(totalProp);
+ const delta=totalBase?((totalProp-totalBase)/totalBase*100):0;
+ document.getElementById('change').textContent=(delta<=0?Math.abs(delta).toFixed(0)+'% lower':delta.toFixed(0)+'% higher');
+ document.getElementById('queue').textContent=Math.round(baseQueue);
+ const max=Math.max(...Object.values(baselineStages),...Object.values(proposedStages),1);
+ document.getElementById('baselineBars').innerHTML=Object.entries(baselineStages).map(([k,v])=>bar(k,v,max)).join('');
+ document.getElementById('proposedBars').innerHTML=Object.entries(proposedStages).map(([k,v])=>bar(k,v,max)).join('');
+ let message=delta<0?`Under these illustrative assumptions, the coordinated workflow estimates ${Math.abs(delta).toFixed(0)}% lower total time than the baseline.`:delta>0?`Under these illustrative assumptions, the proposed workflow estimates ${delta.toFixed(0)}% higher total time. Review staffing, arrival patterns and service capacity.`:'Under these illustrative assumptions, the two workflows have similar estimated total time.';
+ if(Math.max(regLoad,vitLoad,docLoad,pharmLoad)>1)message+=' At least one service stage is operating above the modelled session capacity; this may indicate a bottleneck.';
+ message+=' These are simplified scenario estimates—not measured outcomes or validated predictions.';
+ document.getElementById('insight').textContent=message;
+}
+ids.forEach(id=>document.getElementById(id).addEventListener('input',setOutputs));
+document.getElementById('run').addEventListener('click',simulate);
+document.getElementById('reset').addEventListener('click',()=>{ids.forEach(id=>document.getElementById(id).value=defaults[id]);simulate()});
+simulate();
+</script>
+</body>
+</html>
